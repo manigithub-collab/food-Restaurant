@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Cart</title>
+
+<style>
+body{
+     font-family: Arial; 
+     background:#f5f5f5;
+     }
+
+h1 {
+     text-align:center; 
+    }
+
+.cart-badge {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    background: red;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.cart-container {
+    width: 90%;
+    max-width: 800px;
+    margin: auto;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+.cart-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+}
+
+.cart-details { flex: 1; margin-left: 15px; }
+
+.qty-box button {
+    padding: 4px 10px;
+    font-size: 16px;
+}
+
+.remove-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 5px;
+}
+
+.total {
+    text-align: right;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.checkout-btn, .whatsapp-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+}
+
+.checkout-btn { background: green; color: white; }
+.whatsapp-btn { background: #25D366; color: white; }
+</style>
+</head>
+
+<body>
+
+<h1>🛒 My Cart</h1>
+<div class="cart-badge" id="cartCount">0</div>
+
+<div class="cart-container" id="cartContainer"></div>
+<div class="total" id="totalPrice">Total: ₹0</div>
+
+<button class="checkout-btn" onclick="checkout()">Checkout</button>
+<button class="whatsapp-btn" onclick="orderWhatsApp()">Order via WhatsApp</button>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const cartContainer = document.getElementById("cartContainer");
+const totalPriceEl = document.getElementById("totalPrice");
+const cartCount = document.getElementById("cartCount");
+
+function displayCart() {
+    cartContainer.innerHTML = "";
+    let total = 0;
+    let count = 0;
+
+    if (cart.length === 0) {
+        cartContainer.innerHTML = "<h3>Your cart is empty</h3>";
+        totalPriceEl.innerText = "Total: ₹0";
+        cartCount.innerText = 0;
+        return;
+    }
+
+    cart.forEach((item, index) => {
+        total += item.price * item.qty;
+        count += item.qty;
+
+        cartContainer.innerHTML += `
+        <div class="cart-item">
+            <img src="${item.img}">
+            <div class="cart-details">
+                <h3>${item.name}</h3>
+                <p>₹${item.price}</p>
+
+                <div class="qty-box">
+                    <button onclick="changeQty(${index}, -1)">−</button>
+                    <span>${item.qty}</span>
+                    <button onclick="changeQty(${index}, 1)">+</button>
+                </div>
+            </div>
+
+            <button class="remove-btn" onclick="removeItem(${index})">X</button>
+        </div>`;
+    });
+
+    totalPriceEl.innerText = "Total: ₹" + total;
+    cartCount.innerText = count;
+}
+
+function changeQty(index, value) {
+    cart[index].qty += value;
+    if (cart[index].qty <= 0) cart.splice(index, 1);
+    saveCart();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+}
+
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+function checkout() {
+    alert("Checkout Successful! (Demo)");
+    localStorage.removeItem("cart");
+    cart = [];
+    displayCart();
+}
+
+function orderWhatsApp() {
+    let msg = "🛒 *Food Order*\n\n";
+    let total = 0;
+
+    cart.forEach(item => {
+        msg += `${item.name} x ${item.qty} = ₹${item.price * item.qty}\n`;
+        total += item.price * item.qty;
+    });
+
+    msg += `\n*Total: ₹${total}*`;
+
+    let phone = "919999999999"; // change number
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+}
+
+displayCart();
+</script>
+
+</body>
+</html>
